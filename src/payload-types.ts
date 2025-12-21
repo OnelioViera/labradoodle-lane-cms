@@ -212,9 +212,15 @@ export interface Puppy {
   price: number;
   status: 'available' | 'reserved' | 'sold';
   /**
-   * Upload multiple photos of this puppy
+   * Paste the full Supabase image URL here (e.g., https://vpxusoradahmqsskbtuj.supabase.co/storage/v1/object/public/media/puppy-1.jpg)
    */
-  photos?: (string | Media)[] | null;
+  photoUrl?: string | null;
+  additionalPhotos?:
+    | {
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
   description?: string | null;
   /**
    * Select the mother from your breeding dogs
@@ -245,7 +251,16 @@ export interface Dog {
   registeredName?: string | null;
   role: 'dam' | 'sire' | 'both';
   status?: ('active' | 'retired' | 'training') | null;
-  photos?: (string | Media)[] | null;
+  /**
+   * Paste the full Supabase image URL here
+   */
+  photoUrl?: string | null;
+  additionalPhotos?:
+    | {
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
   birthDate?: string | null;
   color?: string | null;
   weight?: number | null;
@@ -570,7 +585,13 @@ export interface PuppiesSelect<T extends boolean = true> {
   color?: T;
   price?: T;
   status?: T;
-  photos?: T;
+  photoUrl?: T;
+  additionalPhotos?:
+    | T
+    | {
+        url?: T;
+        id?: T;
+      };
   description?: T;
   dam?: T;
   sire?: T;
@@ -588,7 +609,13 @@ export interface DogsSelect<T extends boolean = true> {
   registeredName?: T;
   role?: T;
   status?: T;
-  photos?: T;
+  photoUrl?: T;
+  additionalPhotos?:
+    | T
+    | {
+        url?: T;
+        id?: T;
+      };
   birthDate?: T;
   color?: T;
   weight?: T;

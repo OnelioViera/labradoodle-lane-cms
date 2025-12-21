@@ -7,7 +7,7 @@ export const Puppies: CollectionConfig = {
     defaultColumns: ['name', 'sex', 'status', 'birthDate', 'price'],
   },
   access: {
-    read: () => true, // Public can view puppies
+    read: () => true,
   },
   fields: [
     {
@@ -78,15 +78,25 @@ export const Puppies: CollectionConfig = {
       ],
     },
     {
-      name: 'photos',
-      type: 'upload',
-      relationTo: 'media',
-      required: false,
-      hasMany: true,
-      label: 'Photos',
+      name: 'photoUrl',
+      type: 'text',
+      label: 'Main Photo URL',
       admin: {
-        description: 'Upload multiple photos of this puppy',
+        description: 'Paste the full Supabase image URL here (e.g., https://vpxusoradahmqsskbtuj.supabase.co/storage/v1/object/public/media/puppy-1.jpg)',
       },
+    },
+    {
+      name: 'additionalPhotos',
+      type: 'array',
+      label: 'Additional Photos',
+      fields: [
+        {
+          name: 'url',
+          type: 'text',
+          label: 'Photo URL',
+          required: true,
+        },
+      ],
     },
     {
       name: 'description',
@@ -133,4 +143,3 @@ export const Puppies: CollectionConfig = {
     },
   ],
 }
-

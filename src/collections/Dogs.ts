@@ -63,11 +63,25 @@ export const Dogs: CollectionConfig = {
       ],
     },
     {
-      name: 'photos',
-      type: 'upload',
-      relationTo: 'media',
-      hasMany: true,
-      label: 'Photos',
+      name: 'photoUrl',
+      type: 'text',
+      label: 'Main Photo URL',
+      admin: {
+        description: 'Paste the full Supabase image URL here',
+      },
+    },
+    {
+      name: 'additionalPhotos',
+      type: 'array',
+      label: 'Additional Photos',
+      fields: [
+        {
+          name: 'url',
+          type: 'text',
+          label: 'Photo URL',
+          required: true,
+        },
+      ],
     },
     {
       name: 'birthDate',

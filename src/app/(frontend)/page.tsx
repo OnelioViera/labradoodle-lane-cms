@@ -8,31 +8,12 @@ export const metadata = {
 }
 
 // Helper function to get image URL
-function getImageUrl(photo: any): string | null {
-  if (!photo) return null
+function getImageUrl(photoUrl: string | null | undefined): string | null {
+  if (!photoUrl) return null
 
-  const supabaseURL = 'https://vpxusoradahmqsskbtuj.supabase.co'
-
-  // If photo is an object with url property
-  if (typeof photo === 'object' && photo.url) {
-    // If it's a relative Payload URL, convert to Supabase URL
-    if (photo.url.startsWith('/api/media/file/')) {
-      const filename = photo.url.replace('/api/media/file/', '')
-      return `${supabaseURL}/storage/v1/object/public/media/${filename}`
-    }
-
-    // If it's already a full URL, use it
-    if (photo.url.startsWith('http')) {
-      return photo.url
-    }
-
-    // Otherwise, assume it's a Supabase filename
-    return `${supabaseURL}/storage/v1/object/public/media/${photo.url}`
-  }
-
-  // If photo is just a string (filename)
-  if (typeof photo === 'string') {
-    return `${supabaseURL}/storage/v1/object/public/media/${photo}`
+  // If it's already a full URL, return it
+  if (photoUrl.startsWith('http')) {
+    return photoUrl
   }
 
   return null
@@ -42,7 +23,7 @@ export default async function HomePage() {
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
-  // Fetch available puppies with depth
+  // Fetch available puppies
   const puppiesData = await payload.find({
     collection: 'puppies',
     where: {
@@ -50,14 +31,13 @@ export default async function HomePage() {
         equals: 'available',
       },
     },
-    depth: 2, // Increase to 2 to ensure full population
     limit: 6,
     sort: '-createdAt',
   })
 
   const puppies = puppiesData.docs
 
-  // Fetch featured dogs with depth
+  // Fetch featured dogs
   const dogsData = await payload.find({
     collection: 'dogs',
     where: {
@@ -65,7 +45,6 @@ export default async function HomePage() {
         equals: true,
       },
     },
-    depth: 2, // Increase to 2
     limit: 4,
   })
 
@@ -189,8 +168,7 @@ export default async function HomePage() {
             </div>
             <div className="dogs-grid">
               {dogs.map((dog: any) => {
-                const imageUrl =
-                  dog.photos && dog.photos.length > 0 ? getImageUrl(dog.photos[0]) : null
+                const imageUrl = getImageUrl(dog.photoUrl)
 
                 return (
                   <div key={dog.id} className="dog-card">
