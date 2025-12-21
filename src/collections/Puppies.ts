@@ -83,6 +83,13 @@ export const Puppies: CollectionConfig = {
       label: 'Main Photo URL',
       admin: {
         description: 'Paste the full Supabase image URL here (e.g., https://vpxusoradahmqsskbtuj.supabase.co/storage/v1/object/public/media/puppy-1.jpg)',
+        components: {
+          afterInput: [
+            {
+              path: '/components/ImagePreview#ImagePreview',
+            },
+          ],
+        },
       },
     },
     {

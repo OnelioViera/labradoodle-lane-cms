@@ -95,8 +95,7 @@ export default async function HomePage() {
             <>
               <div className="puppies-grid">
                 {puppies.map((puppy: any) => {
-                  const imageUrl =
-                    puppy.photos && puppy.photos.length > 0 ? getImageUrl(puppy.photos[0]) : null
+                  const imageUrl = getImageUrl(puppy.photoUrl)
 
                   return (
                     <Link href={`/puppies/${puppy.id}`} key={puppy.id} className="puppy-card">
