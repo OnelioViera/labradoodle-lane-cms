@@ -2,11 +2,28 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import Link from 'next/link'
 import Image from 'next/image'
-import type { Testimonial, Puppy, Dog } from '@/payload-types'
+import type { Testimonial, Puppy, Dog, Media } from '@/payload-types'
 
 export const metadata = {
   title: 'Golden Valley Kennels - Premium Golden Retriever Breeder',
   description: 'Premium Golden Retriever breeder dedicated to health, temperament, and excellence',
+}
+
+// Helper function to get image URL
+function getImageUrl(photo: string | Media | null | undefined): string | null {
+  if (!photo) return null
+
+  // If photo is an object with url property
+  if (typeof photo === 'object' && photo.url) {
+    // Check if it's a full URL or relative path
+    if (photo.url.startsWith('http')) {
+      return photo.url
+    }
+    // For relative paths, prepend the base URL
+    return `${process.env.NEXT_PUBLIC_SERVER_URL || ''}${photo.url}`
+  }
+
+  return null
 }
 
 export default async function HomePage() {
@@ -82,40 +99,55 @@ export default async function HomePage() {
           {puppies.length > 0 ? (
             <>
               <div className="puppies-grid">
-                {puppies.map((puppy: Puppy) => (
-                  <Link href={`/puppies/${puppy.id}`} key={puppy.id} className="puppy-card">
-                    <div className="puppy-image">
-                      {puppy.photos &&
-                      puppy.photos.length > 0 &&
-                      typeof puppy.photos[0] === 'object' &&
-                      puppy.photos[0]?.url ? (
-                        <Image
-                          src={puppy.photos[0].url}
-                          alt={puppy.name}
-                          fill
-                          style={{ objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <div className="placeholder-image">🐕</div>
-                      )}
-                    </div>
-                    <div className="puppy-info">
-                      <h3>{puppy.name}</h3>
-                      <div className="puppy-details">
-                        <p>
-                          <strong>Sex:</strong> {puppy.sex}
-                        </p>
-                        <p>
-                          <strong>Color:</strong> {puppy.color || 'Golden'}
-                        </p>
-                        <p>
-                          <strong>Price:</strong> ${puppy.price?.toLocaleString()}
-                        </p>
+                {puppies.map((puppy: Puppy) => {
+                  const imageUrl =
+                    puppy.photos && puppy.photos.length > 0 ? getImageUrl(puppy.photos[0]) : null
+
+                  return (
+                    <Link href={`/puppies/${puppy.id}`} key={puppy.id} className="puppy-card">
+                      <div className="puppy-image">
+                        {imageUrl ? (
+                          <Image
+                            src={imageUrl}
+                            alt={puppy.name}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            style={{ objectFit: 'cover' }}
+                            priority={false}
+                          />
+                        ) : (
+                          <div className="placeholder-image">
+                            <div className="placeholder-icon">🐕</div>
+                            <div className="placeholder-text">{puppy.name}</div>
+                          </div>
+                        )}
                       </div>
-                      <span className="status-badge status-available">Available</span>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="puppy-info">
+                        <h3>{puppy.name}</h3>
+                        <div className="puppy-details">
+                          <p>
+                            <strong>Sex:</strong> {puppy.sex === 'male' ? 'Male' : 'Female'}
+                          </p>
+                          {puppy.color && (
+                            <p>
+                              <strong>Color:</strong> {puppy.color}
+                            </p>
+                          )}
+                          <p>
+                            <strong>Price:</strong> ${puppy.price?.toLocaleString()}
+                          </p>
+                          {puppy.birthDate && (
+                            <p>
+                              <strong>Born:</strong>{' '}
+                              {new Date(puppy.birthDate).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                        <span className="status-badge status-available">Available</span>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
               <div className="text-center mt-2">
                 <Link href="/puppies" className="btn btn-outline">
@@ -143,36 +175,60 @@ export default async function HomePage() {
               <p>Meet our exceptional breeding stock with champion bloodlines</p>
             </div>
             <div className="dogs-grid">
-              {dogs.map((dog: Dog) => (
-                <div key={dog.id} className="dog-card">
-                  <div className="dog-image">
-                    {dog.photos &&
-                    dog.photos.length > 0 &&
-                    typeof dog.photos[0] === 'object' &&
-                    dog.photos[0]?.url ? (
-                      <Image
-                        src={dog.photos[0].url}
-                        alt={dog.name}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div className="placeholder-image">🦮</div>
-                    )}
+              {dogs.map((dog: Dog) => {
+                const imageUrl =
+                  dog.photos && dog.photos.length > 0 ? getImageUrl(dog.photos[0]) : null
+
+                return (
+                  <div key={dog.id} className="dog-card">
+                    <div className="dog-image">
+                      {imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          alt={dog.name}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          style={{ objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div className="placeholder-image">
+                          <div className="placeholder-icon">🦮</div>
+                          <div className="placeholder-text">{dog.name}</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="dog-info">
+                      <h3>{dog.name}</h3>
+                      {dog.registeredName && (
+                        <p className="registered-name">{dog.registeredName}</p>
+                      )}
+                      <p className="role">
+                        {dog.role === 'dam'
+                          ? 'Dam (Female)'
+                          : dog.role === 'sire'
+                            ? 'Sire (Male)'
+                            : 'Breeding Dog'}
+                      </p>
+                      {dog.healthClearances && (
+                        <div className="health-summary">
+                          {dog.healthClearances.hips && (
+                            <span className="health-badge">✓ Hips</span>
+                          )}
+                          {dog.healthClearances.elbows && (
+                            <span className="health-badge">✓ Elbows</span>
+                          )}
+                          {dog.healthClearances.eyes && (
+                            <span className="health-badge">✓ Eyes</span>
+                          )}
+                          {dog.healthClearances.heart && (
+                            <span className="health-badge">✓ Heart</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="dog-info">
-                    <h3>{dog.name}</h3>
-                    {dog.registeredName && <p className="registered-name">{dog.registeredName}</p>}
-                    <p className="role">
-                      {dog.role === 'dam'
-                        ? 'Dam (Female)'
-                        : dog.role === 'sire'
-                          ? 'Sire (Male)'
-                          : 'Breeding Dog'}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
             <div className="text-center mt-2">
               <Link href="/dogs" className="btn btn-outline">
@@ -194,14 +250,24 @@ export default async function HomePage() {
             <div className="testimonials-grid">
               {testimonials.map((testimonial: Testimonial) => (
                 <div key={testimonial.id} className="testimonial-card">
+                  <div className="testimonial-rating">
+                    {testimonial.rating && (
+                      <div className="stars">
+                        {'⭐'.repeat(Math.min(5, Math.max(0, testimonial.rating)))}
+                      </div>
+                    )}
+                  </div>
                   <div className="testimonial-text">&ldquo;{testimonial.testimonial}&rdquo;</div>
                   <div className="testimonial-author">
                     <div className="author-avatar">
-                      {testimonial.authorName?.charAt(0).toUpperCase()}
+                      {testimonial.authorName?.charAt(0).toUpperCase() || 'A'}
                     </div>
                     <div className="author-info">
                       <strong>{testimonial.authorName}</strong>
                       {testimonial.location && <span>{testimonial.location}</span>}
+                      {testimonial.puppyName && (
+                        <span className="puppy-name">Puppy: {testimonial.puppyName}</span>
+                      )}
                     </div>
                   </div>
                 </div>
