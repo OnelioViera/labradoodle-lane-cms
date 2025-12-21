@@ -1,8 +1,6 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
 import Link from 'next/link'
-import Image from 'next/image'
-import type { Testimonial, Puppy, Dog } from '@/payload-types'
 
 export const metadata = {
   title: 'Golden Valley Kennels - Premium Golden Retriever Breeder',
@@ -13,16 +11,14 @@ export const metadata = {
 function getImageUrl(photo: any): string | null {
   if (!photo) return null
 
-  const supabaseURL = 'https://vpxusoradahmqsskbtuj.supabase.co' // Hardcode for now
+  const supabaseURL = 'https://vpxusoradahmqsskbtuj.supabase.co'
 
   // If photo is an object with url property
   if (typeof photo === 'object' && photo.url) {
     // If it's a relative Payload URL, convert to Supabase URL
     if (photo.url.startsWith('/api/media/file/')) {
       const filename = photo.url.replace('/api/media/file/', '')
-      const fullURL = `${supabaseURL}/storage/v1/object/public/media/${filename}`
-      console.log('Converting URL:', photo.url, '→', fullURL)
-      return fullURL
+      return `${supabaseURL}/storage/v1/object/public/media/${filename}`
     }
 
     // If it's already a full URL, use it
@@ -31,9 +27,12 @@ function getImageUrl(photo: any): string | null {
     }
 
     // Otherwise, assume it's a Supabase filename
-    const fullURL = `${supabaseURL}/storage/v1/object/public/media/${photo.url}`
-    console.log('Direct filename:', photo.url, '→', fullURL)
-    return fullURL
+    return `${supabaseURL}/storage/v1/object/public/media/${photo.url}`
+  }
+
+  // If photo is just a string (filename)
+  if (typeof photo === 'string') {
+    return `${supabaseURL}/storage/v1/object/public/media/${photo}`
   }
 
   return null
@@ -43,7 +42,7 @@ export default async function HomePage() {
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
-  // Fetch available puppies
+  // Fetch available puppies with depth
   const puppiesData = await payload.find({
     collection: 'puppies',
     where: {
@@ -51,11 +50,14 @@ export default async function HomePage() {
         equals: 'available',
       },
     },
+    depth: 2, // Increase to 2 to ensure full population
     limit: 6,
     sort: '-createdAt',
   })
 
-  // Fetch featured dogs
+  const puppies = puppiesData.docs
+
+  // Fetch featured dogs with depth
   const dogsData = await payload.find({
     collection: 'dogs',
     where: {
@@ -63,8 +65,11 @@ export default async function HomePage() {
         equals: true,
       },
     },
+    depth: 2, // Increase to 2
     limit: 4,
   })
+
+  const dogs = dogsData.docs
 
   // Fetch featured testimonials
   const testimonialsData = await payload.find({
@@ -77,8 +82,6 @@ export default async function HomePage() {
     limit: 3,
   })
 
-  const puppies = puppiesData.docs
-  const dogs = dogsData.docs
   const testimonials = testimonialsData.docs
 
   return (
@@ -112,7 +115,7 @@ export default async function HomePage() {
           {puppies.length > 0 ? (
             <>
               <div className="puppies-grid">
-                {puppies.map((puppy: Puppy) => {
+                {puppies.map((puppy: any) => {
                   const imageUrl =
                     puppy.photos && puppy.photos.length > 0 ? getImageUrl(puppy.photos[0]) : null
 
@@ -120,13 +123,10 @@ export default async function HomePage() {
                     <Link href={`/puppies/${puppy.id}`} key={puppy.id} className="puppy-card">
                       <div className="puppy-image">
                         {imageUrl ? (
-                          <Image
+                          <img
                             src={imageUrl}
                             alt={puppy.name}
-                            fill
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            style={{ objectFit: 'cover' }}
-                            priority={false}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         ) : (
                           <div className="placeholder-image">
@@ -188,7 +188,7 @@ export default async function HomePage() {
               <p>Meet our exceptional breeding stock with champion bloodlines</p>
             </div>
             <div className="dogs-grid">
-              {dogs.map((dog: Dog) => {
+              {dogs.map((dog: any) => {
                 const imageUrl =
                   dog.photos && dog.photos.length > 0 ? getImageUrl(dog.photos[0]) : null
 
@@ -196,12 +196,10 @@ export default async function HomePage() {
                   <div key={dog.id} className="dog-card">
                     <div className="dog-image">
                       {imageUrl ? (
-                        <Image
+                        <img
                           src={imageUrl}
                           alt={dog.name}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          style={{ objectFit: 'cover' }}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       ) : (
                         <div className="placeholder-image">
@@ -261,7 +259,7 @@ export default async function HomePage() {
               <p>Hear what our puppy families have to say</p>
             </div>
             <div className="testimonials-grid">
-              {testimonials.map((testimonial: Testimonial) => (
+              {testimonials.map((testimonial: any) => (
                 <div key={testimonial.id} className="testimonial-card">
                   <div className="testimonial-rating">
                     {testimonial.rating && (

@@ -41,4 +41,34 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
     mimeTypes: ['image/*'],
   },
+  hooks: {
+    beforeChange: [
+      ({ data }) => {
+        const supabaseURL = process.env.SUPABASE_URL || 'https://vpxusoradahmqsskbtuj.supabase.co'
+        
+        // Fix main URL
+        if (data.filename) {
+          data.url = `${supabaseURL}/storage/v1/object/public/media/${data.filename}`
+        }
+        
+        // Fix thumbnail URL
+        if (data.sizes?.thumbnail?.filename) {
+          data.thumbnailURL = `${supabaseURL}/storage/v1/object/public/media/${data.sizes.thumbnail.filename}`
+          data.sizes.thumbnail.url = `${supabaseURL}/storage/v1/object/public/media/${data.sizes.thumbnail.filename}`
+        }
+        
+        // Fix card URL
+        if (data.sizes?.card?.filename) {
+          data.sizes.card.url = `${supabaseURL}/storage/v1/object/public/media/${data.sizes.card.filename}`
+        }
+        
+        // Fix tablet URL
+        if (data.sizes?.tablet?.filename) {
+          data.sizes.tablet.url = `${supabaseURL}/storage/v1/object/public/media/${data.sizes.tablet.filename}`
+        }
+        
+        return data
+      },
+    ],
+  },
 }
