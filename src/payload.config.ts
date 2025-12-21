@@ -1,5 +1,6 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -12,6 +13,7 @@ import { Dogs } from './collections/Dogs'
 import { Testimonials } from './collections/Testimonials'
 import { Posts } from './collections/Posts'
 import { Pages } from './collections/Pages'
+import { supabaseAdapter } from './supabase-adapter'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -33,5 +35,14 @@ export default buildConfig({
     url: process.env.DATABASE_URL || '',
   }),
   sharp,
-  plugins: [],
+  plugins: [
+    cloudStoragePlugin({
+      collections: {
+        media: {
+          adapter: supabaseAdapter(),
+          disableLocalStorage: true,
+        },
+      },
+    }),
+  ],
 })

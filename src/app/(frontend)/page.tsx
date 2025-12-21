@@ -2,7 +2,7 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import Link from 'next/link'
 import Image from 'next/image'
-import type { Testimonial, Puppy, Dog, Media } from '@/payload-types'
+import type { Testimonial, Puppy, Dog } from '@/payload-types'
 
 export const metadata = {
   title: 'Golden Valley Kennels - Premium Golden Retriever Breeder',
@@ -10,17 +10,30 @@ export const metadata = {
 }
 
 // Helper function to get image URL
-function getImageUrl(photo: string | Media | null | undefined): string | null {
+function getImageUrl(photo: any): string | null {
   if (!photo) return null
+
+  const supabaseURL = 'https://vpxusoradahmqsskbtuj.supabase.co' // Hardcode for now
 
   // If photo is an object with url property
   if (typeof photo === 'object' && photo.url) {
-    // Check if it's a full URL or relative path
+    // If it's a relative Payload URL, convert to Supabase URL
+    if (photo.url.startsWith('/api/media/file/')) {
+      const filename = photo.url.replace('/api/media/file/', '')
+      const fullURL = `${supabaseURL}/storage/v1/object/public/media/${filename}`
+      console.log('Converting URL:', photo.url, '→', fullURL)
+      return fullURL
+    }
+
+    // If it's already a full URL, use it
     if (photo.url.startsWith('http')) {
       return photo.url
     }
-    // For relative paths, prepend the base URL
-    return `${process.env.NEXT_PUBLIC_SERVER_URL || ''}${photo.url}`
+
+    // Otherwise, assume it's a Supabase filename
+    const fullURL = `${supabaseURL}/storage/v1/object/public/media/${photo.url}`
+    console.log('Direct filename:', photo.url, '→', fullURL)
+    return fullURL
   }
 
   return null
