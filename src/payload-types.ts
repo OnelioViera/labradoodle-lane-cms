@@ -69,6 +69,11 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    puppies: Puppy;
+    dogs: Dog;
+    testimonials: Testimonial;
+    posts: Post;
+    pages: Page;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +83,11 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    puppies: PuppiesSelect<false> | PuppiesSelect<true>;
+    dogs: DogsSelect<false> | DogsSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -122,6 +132,7 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  name?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -146,7 +157,10 @@ export interface User {
  */
 export interface Media {
   id: string;
-  alt: string;
+  /**
+   * Alternative text for accessibility and SEO
+   */
+  alt?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -158,6 +172,223 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    tablet?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "puppies".
+ */
+export interface Puppy {
+  id: string;
+  name: string;
+  sex: 'male' | 'female';
+  birthDate: string;
+  color?: string | null;
+  price: number;
+  status: 'available' | 'reserved' | 'sold';
+  /**
+   * Upload multiple photos of this puppy
+   */
+  photos?: (string | Media)[] | null;
+  description?: string | null;
+  /**
+   * Select the mother from your breeding dogs
+   */
+  dam?: (string | null) | Dog;
+  /**
+   * Select the father from your breeding dogs
+   */
+  sire?: (string | null) | Dog;
+  /**
+   * Optional - current weight of puppy
+   */
+  weight?: number | null;
+  /**
+   * Show this puppy on homepage
+   */
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dogs".
+ */
+export interface Dog {
+  id: string;
+  name: string;
+  registeredName?: string | null;
+  role: 'dam' | 'sire' | 'both';
+  status?: ('active' | 'retired' | 'training') | null;
+  photos?: (string | Media)[] | null;
+  birthDate?: string | null;
+  color?: string | null;
+  weight?: number | null;
+  bio?: string | null;
+  healthClearances?: {
+    hips?: string | null;
+    elbows?: string | null;
+    heart?: string | null;
+    eyes?: string | null;
+    dna?: string | null;
+  };
+  titles?:
+    | {
+        title: string;
+        year?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  pedigree?: {
+    sire?: string | null;
+    dam?: string | null;
+    pedigreeLink?: string | null;
+  };
+  /**
+   * Show on main breeding dogs page
+   */
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: string;
+  authorName: string;
+  location?: string | null;
+  testimonial: string;
+  /**
+   * Name of the puppy they purchased (optional)
+   */
+  puppyName?: string | null;
+  /**
+   * Photo of the customer or their puppy (optional)
+   */
+  photo?: (string | null) | Media;
+  /**
+   * Star rating out of 5
+   */
+  rating?: number | null;
+  date?: string | null;
+  /**
+   * Only approved testimonials will show on website
+   */
+  approved?: boolean | null;
+  /**
+   * Show prominently on homepage
+   */
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  /**
+   * Used in the URL - e.g., "new-litter-announcement"
+   */
+  slug: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Short summary shown in post listings
+   */
+  excerpt?: string | null;
+  featuredImage?: (string | null) | Media;
+  /**
+   * Additional photos for the post
+   */
+  gallery?: (string | Media)[] | null;
+  category?: ('litter' | 'puppy' | 'news' | 'health' | 'events' | 'general') | null;
+  status: 'draft' | 'published';
+  publishedDate?: string | null;
+  author?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  title: string;
+  /**
+   * Used in the URL - e.g., "about-us", "our-guarantee"
+   */
+  slug: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Main image for the page (optional)
+   */
+  featuredImage?: (string | null) | Media;
+  status: 'draft' | 'published';
+  showInMenu?: boolean | null;
+  /**
+   * Order in navigation menu (lower numbers appear first)
+   */
+  menuOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -190,6 +421,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'puppies';
+        value: string | Puppy;
+      } | null)
+    | ({
+        relationTo: 'dogs';
+        value: string | Dog;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: string | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -238,6 +489,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -272,6 +524,151 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        tablet?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "puppies_select".
+ */
+export interface PuppiesSelect<T extends boolean = true> {
+  name?: T;
+  sex?: T;
+  birthDate?: T;
+  color?: T;
+  price?: T;
+  status?: T;
+  photos?: T;
+  description?: T;
+  dam?: T;
+  sire?: T;
+  weight?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dogs_select".
+ */
+export interface DogsSelect<T extends boolean = true> {
+  name?: T;
+  registeredName?: T;
+  role?: T;
+  status?: T;
+  photos?: T;
+  birthDate?: T;
+  color?: T;
+  weight?: T;
+  bio?: T;
+  healthClearances?:
+    | T
+    | {
+        hips?: T;
+        elbows?: T;
+        heart?: T;
+        eyes?: T;
+        dna?: T;
+      };
+  titles?:
+    | T
+    | {
+        title?: T;
+        year?: T;
+        id?: T;
+      };
+  pedigree?:
+    | T
+    | {
+        sire?: T;
+        dam?: T;
+        pedigreeLink?: T;
+      };
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  authorName?: T;
+  location?: T;
+  testimonial?: T;
+  puppyName?: T;
+  photo?: T;
+  rating?: T;
+  date?: T;
+  approved?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  gallery?: T;
+  category?: T;
+  status?: T;
+  publishedDate?: T;
+  author?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  featuredImage?: T;
+  status?: T;
+  showInMenu?: T;
+  menuOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

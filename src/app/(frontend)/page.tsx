@@ -1,59 +1,257 @@
-import { headers as getHeaders } from 'next/headers.js'
-import Image from 'next/image'
 import { getPayload } from 'payload'
-import React from 'react'
-import { fileURLToPath } from 'url'
-
 import config from '@/payload.config'
-import './styles.css'
+import Link from 'next/link'
+import Image from 'next/image'
+import type { Testimonial, Puppy, Dog } from '@/payload-types'
+
+export const metadata = {
+  title: 'Golden Valley Kennels - Premium Golden Retriever Breeder',
+  description: 'Premium Golden Retriever breeder dedicated to health, temperament, and excellence',
+}
 
 export default async function HomePage() {
-  const headers = await getHeaders()
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
-  const { user } = await payload.auth({ headers })
 
-  const fileURL = `vscode://file/${fileURLToPath(import.meta.url)}`
+  // Fetch available puppies
+  const puppiesData = await payload.find({
+    collection: 'puppies',
+    where: {
+      status: {
+        equals: 'available',
+      },
+    },
+    limit: 6,
+    sort: '-createdAt',
+  })
+
+  // Fetch featured dogs
+  const dogsData = await payload.find({
+    collection: 'dogs',
+    where: {
+      featured: {
+        equals: true,
+      },
+    },
+    limit: 4,
+  })
+
+  // Fetch featured testimonials
+  const testimonialsData = await payload.find({
+    collection: 'testimonials',
+    where: {
+      featured: {
+        equals: true,
+      },
+    },
+    limit: 3,
+  })
+
+  const puppies = puppiesData.docs
+  const dogs = dogsData.docs
+  const testimonials = testimonialsData.docs
 
   return (
-    <div className="home">
-      <div className="content">
-        <picture>
-          <source srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg" />
-          <Image
-            alt="Payload Logo"
-            height={65}
-            src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg"
-            width={65}
-          />
-        </picture>
-        {!user && <h1>Welcome to your new project.</h1>}
-        {user && <h1>Welcome back, {user.email}</h1>}
-        <div className="links">
-          <a
-            className="admin"
-            href={payloadConfig.routes.admin}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Go to admin panel
-          </a>
-          <a
-            className="docs"
-            href="https://payloadcms.com/docs"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Documentation
-          </a>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="hero">
+        <div className="hero-content">
+          <h1>Welcome to Golden Valley Kennels</h1>
+          <p className="hero-subtitle">
+            Premium Golden Retriever breeder dedicated to health, temperament, and excellence
+          </p>
+          <div className="hero-buttons">
+            <Link href="/puppies" className="btn btn-primary">
+              View Available Puppies
+            </Link>
+            <Link href="/contact" className="btn btn-secondary">
+              Contact Us
+            </Link>
+          </div>
         </div>
-      </div>
-      <div className="footer">
-        <p>Update this page by editing</p>
-        <a className="codeLink" href={fileURL}>
-          <code>app/(frontend)/page.tsx</code>
-        </a>
-      </div>
+      </section>
+
+      {/* Available Puppies Section */}
+      <section className="section">
+        <div className="container">
+          <div className="section-header">
+            <h2>Available Puppies</h2>
+            <p>Meet our beautiful, health-tested puppies ready for their forever homes</p>
+          </div>
+
+          {puppies.length > 0 ? (
+            <>
+              <div className="puppies-grid">
+                {puppies.map((puppy: Puppy) => (
+                  <Link href={`/puppies/${puppy.id}`} key={puppy.id} className="puppy-card">
+                    <div className="puppy-image">
+                      {puppy.photos &&
+                      puppy.photos.length > 0 &&
+                      typeof puppy.photos[0] === 'object' &&
+                      puppy.photos[0]?.url ? (
+                        <Image
+                          src={puppy.photos[0].url}
+                          alt={puppy.name}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div className="placeholder-image">🐕</div>
+                      )}
+                    </div>
+                    <div className="puppy-info">
+                      <h3>{puppy.name}</h3>
+                      <div className="puppy-details">
+                        <p>
+                          <strong>Sex:</strong> {puppy.sex}
+                        </p>
+                        <p>
+                          <strong>Color:</strong> {puppy.color || 'Golden'}
+                        </p>
+                        <p>
+                          <strong>Price:</strong> ${puppy.price?.toLocaleString()}
+                        </p>
+                      </div>
+                      <span className="status-badge status-available">Available</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              <div className="text-center mt-2">
+                <Link href="/puppies" className="btn btn-outline">
+                  View All Puppies
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="no-puppies">
+              <p>No puppies available at the moment. Check back soon or join our waiting list!</p>
+              <Link href="/contact" className="btn btn-primary">
+                Join Waiting List
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Our Dogs Section */}
+      {dogs.length > 0 && (
+        <section className="section section-alt">
+          <div className="container">
+            <div className="section-header">
+              <h2>Our Breeding Dogs</h2>
+              <p>Meet our exceptional breeding stock with champion bloodlines</p>
+            </div>
+            <div className="dogs-grid">
+              {dogs.map((dog: Dog) => (
+                <div key={dog.id} className="dog-card">
+                  <div className="dog-image">
+                    {dog.photos &&
+                    dog.photos.length > 0 &&
+                    typeof dog.photos[0] === 'object' &&
+                    dog.photos[0]?.url ? (
+                      <Image
+                        src={dog.photos[0].url}
+                        alt={dog.name}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div className="placeholder-image">🦮</div>
+                    )}
+                  </div>
+                  <div className="dog-info">
+                    <h3>{dog.name}</h3>
+                    {dog.registeredName && <p className="registered-name">{dog.registeredName}</p>}
+                    <p className="role">
+                      {dog.role === 'dam'
+                        ? 'Dam (Female)'
+                        : dog.role === 'sire'
+                          ? 'Sire (Male)'
+                          : 'Breeding Dog'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="text-center mt-2">
+              <Link href="/dogs" className="btn btn-outline">
+                View All Our Dogs
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Testimonials Section */}
+      {testimonials.length > 0 && (
+        <section className="section">
+          <div className="container">
+            <div className="section-header">
+              <h2>Happy Families</h2>
+              <p>Hear what our puppy families have to say</p>
+            </div>
+            <div className="testimonials-grid">
+              {testimonials.map((testimonial: Testimonial) => (
+                <div key={testimonial.id} className="testimonial-card">
+                  <div className="testimonial-text">&ldquo;{testimonial.testimonial}&rdquo;</div>
+                  <div className="testimonial-author">
+                    <div className="author-avatar">
+                      {testimonial.authorName?.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="author-info">
+                      <strong>{testimonial.authorName}</strong>
+                      {testimonial.location && <span>{testimonial.location}</span>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* About Preview Section */}
+      <section className="section section-alt">
+        <div className="container">
+          <div className="about-preview">
+            <div className="about-content">
+              <h2>Our Mission & Values</h2>
+              <p>
+                At Golden Valley Kennels, we are passionate about breeding healthy, well-tempered
+                Golden Retrievers that become beloved family members. Our breeding program focuses
+                on health, temperament, and conformation to breed standards.
+              </p>
+              <p>
+                Every puppy is raised in our home with early neurological stimulation, extensive
+                socialization, and lots of love. We perform comprehensive health testing on all
+                breeding dogs and provide lifetime support to our puppy families.
+              </p>
+              <Link href="/about" className="btn btn-primary">
+                Learn More About Us
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact CTA Section */}
+      <section className="section cta-section">
+        <div className="container">
+          <div className="cta-content">
+            <h2>Ready to Welcome a Golden Retriever?</h2>
+            <p>Contact us today to learn more about our available puppies and upcoming litters</p>
+            <div className="cta-buttons">
+              <Link href="/contact" className="btn btn-primary-large">
+                Get in Touch
+              </Link>
+              <Link href="/puppies" className="btn btn-secondary-large">
+                View Available Puppies
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
