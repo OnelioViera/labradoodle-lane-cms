@@ -24,13 +24,6 @@ export default buildConfig({
     meta: {
       titleSuffix: '- Labradoodle Lane CMS',
       favicon: '/favicon.ico',
-      ogImage: '/og-image.jpg',
-    },
-    components: {
-      graphics: {
-        Logo: '/components/Logo#Logo',
-        Icon: '/components/Logo#Logo',
-      },
     },
     importMap: {
       baseDir: path.resolve(dirname),
