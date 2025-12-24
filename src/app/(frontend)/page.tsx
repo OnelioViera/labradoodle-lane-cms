@@ -2,8 +2,9 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import Link from 'next/link'
 
-// Add this line to make the page dynamic
+// Force dynamic rendering and disable all caching
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export const metadata = {
   title: 'Golden Valley Kennels - Premium Golden Retriever Breeder',
