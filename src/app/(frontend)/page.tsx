@@ -2,6 +2,9 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import Link from 'next/link'
 
+// Add this line to make the page dynamic
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Golden Valley Kennels - Premium Golden Retriever Breeder',
   description: 'Premium Golden Retriever breeder dedicated to health, temperament, and excellence',
