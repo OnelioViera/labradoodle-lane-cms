@@ -374,11 +374,33 @@ body {
   font-weight: 500;
 }
 
-/* Testimonials */
+/* Testimonials Carousel */
 .testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  display: flex;
   gap: 2rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 1rem 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.testimonials-grid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.testimonials-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.testimonials-grid::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
+}
+
+.testimonials-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
 }
 
 .testimonial-card {
@@ -386,6 +408,10 @@ body {
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  min-width: 350px;
+  max-width: 350px;
+  flex-shrink: 0;
+  scroll-snap-align: center;
 }
 
 .testimonial-rating {
@@ -512,9 +538,13 @@ body {
   }
 
   .puppies-grid,
-  .dogs-grid,
-  .testimonials-grid {
+  .dogs-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .testimonial-card {
+    min-width: 280px;
+    max-width: 280px;
   }
 
   .container {
