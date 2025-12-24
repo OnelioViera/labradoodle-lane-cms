@@ -1,6 +1,7 @@
 import { getPayload } from 'payload'
 import config from '@/payload.config'
 import Link from 'next/link'
+import TestimonialsCarousel from './TestimonialsCarousel'
 
 // Force dynamic rendering and disable all caching
 export const dynamic = 'force-dynamic'
@@ -239,32 +240,7 @@ export default async function HomePage() {
               <h2>Happy Families</h2>
               <p>Hear what our puppy families have to say</p>
             </div>
-            <div className="testimonials-grid">
-              {testimonials.map((testimonial: any) => (
-                <div key={testimonial.id} className="testimonial-card">
-                  <div className="testimonial-rating">
-                    {testimonial.rating && (
-                      <div className="stars">
-                        {'⭐'.repeat(Math.min(5, Math.max(0, testimonial.rating)))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="testimonial-text">&ldquo;{testimonial.testimonial}&rdquo;</div>
-                  <div className="testimonial-author">
-                    <div className="author-avatar">
-                      {testimonial.authorName?.charAt(0).toUpperCase() || 'A'}
-                    </div>
-                    <div className="author-info">
-                      <strong>{testimonial.authorName}</strong>
-                      {testimonial.location && <span>{testimonial.location}</span>}
-                      {testimonial.puppyName && (
-                        <span className="puppy-name">Puppy: {testimonial.puppyName}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <TestimonialsCarousel testimonials={testimonials} />
           </div>
         </section>
       )}
